@@ -1,0 +1,23 @@
+name: Daily News Email
+
+on:
+  schedule:
+    - cron: "0 12 * * *"   # 8am Eastern during daylight time (EDT)
+    - cron: "0 13 * * *"   # 8am Eastern during standard time (EST)
+  workflow_dispatch:        # lets you run it manually to test
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Send digest
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          FORCE_SEND: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+        run: python daily_news.py
